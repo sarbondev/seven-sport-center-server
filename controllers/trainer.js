@@ -1,5 +1,30 @@
 import Trainer from "../models/trainer.js";
+import multer from "multer";
+import crypto from "crypto";
+import path from "path";
 
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads");
+  },
+  filename: (req, file, cb) => {
+    const hash = crypto.randomBytes(16).toString("hex");
+    const ext = path.extname(file.originalname);
+    cb(null, `${hash}${ext}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed!"), false);
+    }
+    cb(null, true);
+  },
+});
+
+// Routes
 export const getAllTrainers = async (_, res) => {
   try {
     const trainers = await Trainer.find();
@@ -23,23 +48,33 @@ export const getTrainerById = async (req, res) => {
 
 export const createTrainer = async (req, res) => {
   try {
-    const { fullName, photo, experience, achievements } = req.body;
-    if (!fullName || !photo || !experience) {
-      return res.status(400).json({ message: "Все поля обязательны" });
-    }
+    upload.single("photo")(req, res, async (err) => {
+      if (err) return res.status(400).json({ message: err.message });
 
-    const newTrainer = new Trainer({
-      fullName,
-      photo,
-      experience,
-      achievements,
+      const { fullName, experience, achievements } = req.body;
+      if (!fullName || !experience) {
+        return res.status(400).json({ message: "Все поля обязательны" });
+      }
+
+      const photo = req.file
+        ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
+        : null;
+
+      const newTrainer = new Trainer({
+        fullName,
+        photo,
+        experience,
+        achievements,
+      });
+
+      await newTrainer.save();
+      res.status(201).json(newTrainer);
     });
-    await newTrainer.save();
-    res.status(201).json(newTrainer);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Ошибка при создании тренера", error: error.message });
+    res.status(500).json({
+      message: "Ошибка при создании тренера",
+      error: error.message,
+    });
   }
 };
 

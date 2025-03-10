@@ -71,9 +71,18 @@ export const getAdmin = async (req, res) => {
 
 export const updateAdmin = async (req, res) => {
   try {
+    const { fullName, phoneNumber, password } = req.body;
+
+    const existingUser = await Admin.findOne({ phoneNumber });
+    if (!existingUser)
+      return res.status(400).json({ message: "Администратор не найден" });
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     const updatedAdmin = await Admin.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      { fullName, phoneNumber, password: hashedPassword },
       { new: true }
     ).select("-password");
     res.json(updatedAdmin);
