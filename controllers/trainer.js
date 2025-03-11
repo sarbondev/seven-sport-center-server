@@ -80,20 +80,38 @@ export const createTrainer = async (req, res) => {
 
 export const updateTrainer = async (req, res) => {
   try {
-    const updatedTrainer = await Trainer.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
+    upload.single("photo")(req, res, async (err) => {
+      if (err) return res.status(400).json({ message: err.message });
+
+      const { fullName, experience, achievements } = req.body;
+
+      const updateData = {
+        fullName,
+        experience,
+        achievements,
+      };
+
+      if (req.file) {
+        updateData.photo = `${req.protocol}://${req.get("host")}/uploads/${
+          req.file.filename
+        }`;
       }
-    );
 
-    if (!updatedTrainer) {
-      return res.status(404).json({ message: "Тренер не найден" });
-    }
+      const updatedTrainer = await Trainer.findByIdAndUpdate(
+        req.params.id,
+        updateData,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
 
-    res.status(200).json(updatedTrainer);
+      if (!updatedTrainer) {
+        return res.status(404).json({ message: "Тренер не найден" });
+      }
+
+      res.status(200).json(updatedTrainer);
+    });
   } catch (error) {
     res
       .status(500)
