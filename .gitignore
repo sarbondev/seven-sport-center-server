@@ -1,5 +1,5 @@
 # static folders
-/uploads
+# /uploads
 
 # compiled output
 /dist
