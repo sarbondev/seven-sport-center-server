@@ -5,6 +5,7 @@ import cors from "cors";
 
 import AdminRoutes from "./routes/admin.js";
 import TrainerRoutes from "./routes/trainer.js";
+import BlogRoutes from "./routes/blog.js";
 
 dotenv.config();
 const app = express();
@@ -19,6 +20,7 @@ app.get("/", (_, res) => res.send("Hello world"));
 
 app.use("/api/admin", AdminRoutes);
 app.use("/api/trainer", TrainerRoutes);
+app.use("/api/blog", BlogRoutes);
 
 mongoose
   .connect(process.env.MONGODB_URI)

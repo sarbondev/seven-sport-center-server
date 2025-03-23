@@ -1,30 +1,6 @@
 import Trainer from "../models/trainer.js";
-import multer from "multer";
-import crypto from "crypto";
-import path from "path";
+import { upload } from "../middlewares/Uploader.js";
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads");
-  },
-  filename: (req, file, cb) => {
-    const hash = crypto.randomBytes(16).toString("hex");
-    const ext = path.extname(file.originalname);
-    cb(null, `${hash}${ext}`);
-  },
-});
-
-const upload = multer({
-  storage,
-  fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith("image/")) {
-      return cb(new Error("Only image files are allowed!"), false);
-    }
-    cb(null, true);
-  },
-});
-
-// Routes
 export const getAllTrainers = async (_, res) => {
   try {
     const trainers = await Trainer.find();
