@@ -1,5 +1,11 @@
 import Trainer from "../models/trainer.js";
 import { upload } from "../middlewares/Uploader.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const getAllTrainers = async (_, res) => {
   try {
@@ -97,12 +103,28 @@ export const updateTrainer = async (req, res) => {
 
 export const deleteTrainer = async (req, res) => {
   try {
-    const trainer = await Trainer.findByIdAndDelete(req.params.id);
+    const trainer = await Trainer.findById(req.params.id);
     if (!trainer) {
       return res.status(404).json({ message: "Тренер не найден" });
     }
 
-    res.status(200).json({ message: "Тренер удален" });
+    if (trainer.image) {
+      const slicedPhoto = trainer.photo.slice(30);
+      const filePath = path.join(__dirname, "..", "uploads", slicedPhoto);
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        } else {
+          console.warn(`Файл не найден: ${filePath}`);
+        }
+      } catch (err) {
+        console.error(`Ошибка при удалении фото: ${filePath}`, err);
+      }
+    }
+
+    const deletedTrainer = await Trainer.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({ message: "Тренер удален", deletedTrainer });
   } catch (error) {
     res
       .status(500)

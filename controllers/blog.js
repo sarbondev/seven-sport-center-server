@@ -1,5 +1,11 @@
 import Blog from "../models/blog.js";
 import { upload } from "../middlewares/Uploader.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const getAllBlogs = async (_, res) => {
   try {
@@ -95,12 +101,28 @@ export const updateBlog = async (req, res) => {
 
 export const deleteBlog = async (req, res) => {
   try {
-    const blog = await Blog.findByIdAndDelete(req.params.id);
+    const blog = await Blog.findById(req.params.id);
     if (!blog) {
       return res.status(404).json({ message: "Блог не найден" });
     }
+    if (blog.photos && blog.photos.length > 0) {
+      blog.photos.forEach((photo) => {
+        const slicedImage = photo.slice(30);
+        const filePath = path.join(__dirname, "..", "uploads", slicedImage);
+        try {
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          } else {
+            console.warn(`Файл не найден: ${filePath}`);
+          }
+        } catch (err) {
+          console.error(`Ошибка при удалении фото: ${filePath}`, err);
+        }
+      });
+    }
+    const deletedBlog = await Blog.findByIdAndDelete(req.params.id);
 
-    res.status(200).json({ message: "Блог удален" });
+    res.status(200).json({ message: "Блог удален", deletedBlog });
   } catch (error) {
     res
       .status(500)
