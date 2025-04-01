@@ -33,8 +33,8 @@ export const createTrainer = async (req, res) => {
     upload.single("photo")(req, res, async (err) => {
       if (err) return res.status(400).json({ message: err.message });
 
-      const { fullName, experience, achievements } = req.body;
-      if (!fullName || !experience) {
+      const { fullName, experience, level, students } = req.body;
+      if (!fullName || !level || !students) {
         return res.status(400).json({ message: "Все поля обязательны" });
       }
 
@@ -46,7 +46,8 @@ export const createTrainer = async (req, res) => {
         fullName,
         photo,
         experience,
-        achievements,
+        level,
+        students,
       });
 
       await newTrainer.save();
@@ -65,12 +66,13 @@ export const updateTrainer = async (req, res) => {
     upload.single("photo")(req, res, async (err) => {
       if (err) return res.status(400).json({ message: err.message });
 
-      const { fullName, experience, achievements } = req.body;
+      const { fullName, experience, level, students } = req.body;
 
       const updateData = {
         fullName,
         experience,
-        achievements,
+        level,
+        students,
       };
 
       if (req.file) {
@@ -108,7 +110,7 @@ export const deleteTrainer = async (req, res) => {
       return res.status(404).json({ message: "Тренер не найден" });
     }
 
-    if (trainer.image) {
+    if (trainer.photo) {
       const slicedPhoto = trainer.photo.slice(30);
       const filePath = path.join(__dirname, "..", "uploads", slicedPhoto);
       try {

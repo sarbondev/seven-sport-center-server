@@ -7,9 +7,12 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const getAllBlogs = async (_, res) => {
+export const getAllBlogs = async (req, res) => {
   try {
-    const blogs = await Blog.find();
+    const { title } = req.query;
+    const query = {};
+    if (title) query.title = { $regex: title, $options: "i" };
+    const blogs = await Blog.find(query);
     res.status(200).json(blogs);
   } catch (error) {
     res.status(500).json({ message: "Ошибка сервера", error: error.message });
