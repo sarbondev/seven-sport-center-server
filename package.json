@@ -7,10 +7,15 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
   "devDependencies": {
+    "@eslint/js": "^9.24.0",
+    "eslint": "^9.24.0",
+    "globals": "^16.0.0",
     "nodemon": "^3.1.9"
   },
   "dependencies": {
