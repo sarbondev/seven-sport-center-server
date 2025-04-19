@@ -6,13 +6,14 @@ import {
   getBlogById,
   updateBlog,
 } from "../controllers/blog.js";
+import isAuth from "../middlewares/isAuth.js";
 
 const router = express.Router();
 
 router.get("/", getAllBlogs);
 router.get("/:id", getBlogById);
-router.post("/", createBlog);
-router.put("/:id", updateBlog);
-router.delete("/:id", deleteBlog);
+router.post("/", isAuth, createBlog);
+router.put("/:id", isAuth, updateBlog);
+router.delete("/:id", isAuth, deleteBlog);
 
 export default router;
