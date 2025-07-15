@@ -3,9 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 
-import AdminRoutes from "./routes/admin.js";
-import TrainerRoutes from "./routes/trainer.js";
-import BlogRoutes from "./routes/blog.js";
+import RootRoutes from "./routes/root.routes.js";
 
 dotenv.config();
 const app = express();
@@ -17,10 +15,7 @@ app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
 app.get("/", (_, res) => res.send("Hello world"));
-
-app.use("/api/admin", AdminRoutes);
-app.use("/api/trainer", TrainerRoutes);
-app.use("/api/blog", BlogRoutes);
+app.use("/api", RootRoutes);
 
 mongoose
   .connect(process.env.MONGODB_URI)
