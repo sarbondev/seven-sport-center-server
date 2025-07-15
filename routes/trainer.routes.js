@@ -5,7 +5,7 @@ import {
   createTrainer,
   updateTrainer,
   deleteTrainer,
-} from "../controllers/trainer.js";
+} from "../controllers/trainer.controller.js";
 import isAuth from "../middlewares/isAuth.js";
 
 const router = express.Router();

@@ -5,7 +5,7 @@ import {
   getAllBlogs,
   getBlogById,
   updateBlog,
-} from "../controllers/blog.js";
+} from "../controllers/blog.controller.js";
 import isAuth from "../middlewares/isAuth.js";
 
 const router = express.Router();

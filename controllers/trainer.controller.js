@@ -7,27 +7,30 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Barcha trenerlarni olish
 export const getAllTrainers = async (_, res) => {
   try {
     const trainers = await Trainer.find();
     res.status(200).json(trainers);
   } catch (error) {
-    res.status(500).json({ message: "Ошибка сервера", error: error.message });
+    res.status(500).json({ message: "Server xatosi", error: error.message });
   }
 };
 
+// Trenerni ID orqali olish
 export const getTrainerById = async (req, res) => {
   try {
     const trainer = await Trainer.findById(req.params.id);
     if (!trainer) {
-      return res.status(404).json({ message: "Тренер не найден" });
+      return res.status(404).json({ message: "Trener topilmadi" });
     }
     res.status(200).json(trainer);
   } catch (error) {
-    res.status(500).json({ message: "Ошибка сервера", error: error.message });
+    res.status(500).json({ message: "Server xatosi", error: error.message });
   }
 };
 
+// Yangi trener yaratish
 export const createTrainer = async (req, res) => {
   try {
     upload.single("photo")(req, res, async (err) => {
@@ -35,7 +38,9 @@ export const createTrainer = async (req, res) => {
 
       const { fullName, experience, level, students } = req.body;
       if (!fullName || !level || !students) {
-        return res.status(400).json({ message: "Все поля обязательны" });
+        return res
+          .status(400)
+          .json({ message: "Barcha maydonlarni to‘ldirish majburiy" });
       }
 
       const photo = req.file
@@ -55,12 +60,13 @@ export const createTrainer = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: "Ошибка при создании тренера",
+      message: "Trenerni yaratishda xatolik yuz berdi",
       error: error.message,
     });
   }
 };
 
+// Trenerni yangilash
 export const updateTrainer = async (req, res) => {
   try {
     upload.single("photo")(req, res, async (err) => {
@@ -91,23 +97,25 @@ export const updateTrainer = async (req, res) => {
       );
 
       if (!updatedTrainer) {
-        return res.status(404).json({ message: "Тренер не найден" });
+        return res.status(404).json({ message: "Trener topilmadi" });
       }
 
       res.status(200).json(updatedTrainer);
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Ошибка при обновлении тренера", error: error.message });
+    res.status(500).json({
+      message: "Trenerni yangilashda xatolik yuz berdi",
+      error: error.message,
+    });
   }
 };
 
+// Trenerni o‘chirish
 export const deleteTrainer = async (req, res) => {
   try {
     const trainer = await Trainer.findById(req.params.id);
     if (!trainer) {
-      return res.status(404).json({ message: "Тренер не найден" });
+      return res.status(404).json({ message: "Trener topilmadi" });
     }
 
     if (trainer.photo) {
@@ -117,19 +125,20 @@ export const deleteTrainer = async (req, res) => {
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);
         } else {
-          console.warn(`Файл не найден: ${filePath}`);
+          console.warn(`Fayl topilmadi: ${filePath}`);
         }
       } catch (err) {
-        console.error(`Ошибка при удалении фото: ${filePath}`, err);
+        console.error(`Rasmni o‘chirishda xatolik: ${filePath}`, err);
       }
     }
 
     const deletedTrainer = await Trainer.findByIdAndDelete(req.params.id);
 
-    res.status(200).json({ message: "Тренер удален", deletedTrainer });
+    res.status(200).json({ message: "Trener o‘chirildi", deletedTrainer });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Ошибка при удалении тренера", error: error.message });
+    res.status(500).json({
+      message: "Trenerni o‘chirishda xatolik yuz berdi",
+      error: error.message,
+    });
   }
 };

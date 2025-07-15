@@ -7,6 +7,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Barcha bloglarni olish
 export const getAllBlogs = async (req, res) => {
   try {
     const { title } = req.query;
@@ -15,22 +16,24 @@ export const getAllBlogs = async (req, res) => {
     const blogs = await Blog.find(query);
     res.status(200).json(blogs);
   } catch (error) {
-    res.status(500).json({ message: "Ошибка сервера", error: error.message });
+    res.status(500).json({ message: "Server xatosi", error: error.message });
   }
 };
 
+// Blogni ID orqali olish
 export const getBlogById = async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id);
     if (!blog) {
-      return res.status(404).json({ message: "Тренер не найден" });
+      return res.status(404).json({ message: "Blog topilmadi" });
     }
     res.status(200).json(blog);
   } catch (error) {
-    res.status(500).json({ message: "Ошибка сервера", error: error.message });
+    res.status(500).json({ message: "Server xatosi", error: error.message });
   }
 };
 
+// Yangi blog yaratish
 export const createBlog = async (req, res) => {
   try {
     upload.array("photos")(req, res, async (err) => {
@@ -38,7 +41,9 @@ export const createBlog = async (req, res) => {
 
       const { title, description } = req.body;
       if (!title || !description) {
-        return res.status(400).json({ message: "Все поля обязательны" });
+        return res
+          .status(400)
+          .json({ message: "Barcha maydonlar to‘ldirilishi shart" });
       }
 
       const photos = req.files.map(
@@ -57,12 +62,13 @@ export const createBlog = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: "Ошибка при создании блога",
+      message: "Blog yaratishda xatolik yuz berdi",
       error: error.message,
     });
   }
 };
 
+// Blogni yangilash
 export const updateBlog = async (req, res) => {
   try {
     upload.array("photos")(req, res, async (err) => {
@@ -89,25 +95,27 @@ export const updateBlog = async (req, res) => {
       );
 
       if (!updatedBlog) {
-        return res.status(404).json({ message: "Блог не найден" });
+        return res.status(404).json({ message: "Blog topilmadi" });
       }
 
       res.status(200).json(updatedBlog);
     });
   } catch (error) {
     res.status(500).json({
-      message: "Ошибка при обновлении блога",
+      message: "Blog yangilashda xatolik yuz berdi",
       error: error.message,
     });
   }
 };
 
+// Blogni o‘chirish
 export const deleteBlog = async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id);
     if (!blog) {
-      return res.status(404).json({ message: "Блог не найден" });
+      return res.status(404).json({ message: "Blog topilmadi" });
     }
+
     if (blog.photos && blog.photos.length > 0) {
       blog.photos.forEach((photo) => {
         const slicedImage = photo.slice(30);
@@ -116,19 +124,21 @@ export const deleteBlog = async (req, res) => {
           if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
           } else {
-            console.warn(`Файл не найден: ${filePath}`);
+            console.warn(`Fayl topilmadi: ${filePath}`);
           }
         } catch (err) {
-          console.error(`Ошибка при удалении фото: ${filePath}`, err);
+          console.error(`Rasmni o‘chirishda xatolik: ${filePath}`, err);
         }
       });
     }
+
     const deletedBlog = await Blog.findByIdAndDelete(req.params.id);
 
-    res.status(200).json({ message: "Блог удален", deletedBlog });
+    res.status(200).json({ message: "Blog o‘chirildi", deletedBlog });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Ошибка при удалении блога", error: error.message });
+    res.status(500).json({
+      message: "Blogni o‘chirishda xatolik yuz berdi",
+      error: error.message,
+    });
   }
 };
