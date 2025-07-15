@@ -5,20 +5,17 @@ import {
   getAllAdmins,
   getUser,
   getAdmin,
-  login,
-  register,
   updateAdmin,
 } from "../controllers/admin.controller.js";
 
 const router = express.Router();
 
-router.post("/register", isAuth, register);
-router.post("/login", login);
+router.use(isAuth);
 
-router.get("/", isAuth, getAllAdmins);
-router.get("/profile", isAuth, getUser);
-router.get("/:id", isAuth, getAdmin);
-router.put("/:id", isAuth, updateAdmin);
-router.delete("/:id", isAuth, deleteAdmin);
+router.get("/", getAllAdmins);
+router.get("/profile", getUser);
+router.get("/:id", getAdmin);
+router.put("/:id", updateAdmin);
+router.delete("/:id", deleteAdmin);
 
 export default router;
