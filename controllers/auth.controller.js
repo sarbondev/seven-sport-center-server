@@ -55,3 +55,58 @@ export const login = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// admin parolini yangilash
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // Maydonlar to‘ldirilganligini tekshirish
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Iltimos, joriy va yangi parolni kiriting",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Yangi parol kamida 6 ta belgidan iborat bo‘lishi kerak",
+      });
+    }
+
+    // Adminni paroli bilan birga olish
+    const admin = await Admin.findById(req.userId);
+
+    // Joriy parolni tekshirish
+    const isCurrentPasswordCorrect = await bcrypt.compare(
+      currentPassword,
+      admin.password
+    );
+    if (!isCurrentPasswordCorrect) {
+      return res.status(400).json({
+        success: false,
+        message: "Joriy parol noto‘g‘ri",
+      });
+    }
+
+    // Yangi parolni hash qilish
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    // Parolni yangilash
+    admin.password = hashedNewPassword;
+    await admin.save();
+
+    res.json({
+      success: true,
+      message: "Parol muvaffaqiyatli o‘zgartirildi",
+    });
+  } catch (error) {
+    console.log("Parolni o‘zgartirishda xatolik:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Parolni o‘zgartirishda xatolik yuz berdi",
+    });
+  }
+};

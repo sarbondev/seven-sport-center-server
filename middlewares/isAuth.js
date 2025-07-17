@@ -9,7 +9,7 @@ const checkAuth = async (req, res, next) => {
     const token =
       authHeader && authHeader.startsWith("Bearer ")
         ? authHeader.slice(7)
-        : null;
+        : authHeader;
 
     // Agar token taqdim etilmagan bo‘lsa
     if (!token) {
